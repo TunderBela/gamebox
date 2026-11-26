@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GAMEBOX</title>
+  <style>
+    :root {
+      --bg: #fdfbf7;
+      --surface: #ffffff;
+      --surface-alt: #f4f1ea;
+      --text: #1e2433;
+      --muted: #5c6578;
+      --border: #e5dfd3;
+      --accent: #3b6ef6;
+      --accent-soft: #eaf0ff;
+      --accent-hover: #2957d4;
+      --badge-mint: #e3f6ec;
+      --badge-mint-text: #1c6b45;
+      --badge-sun: #fff3d6;
+      --badge-sun-text: #8c5b00;
+      --cover-radius: 10px;
+      --card-radius: 16px;
+      --shadow: 0 8px 24px rgba(30, 36, 51, 0.06);
+      --shadow-hover: 0 14px 32px rgba(30, 36, 51, 0.11);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 28px 20px 56px;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 14px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 2px solid var(--text);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      font-size: 1.05rem;
+      box-shadow: 3px 3px 0 var(--text);
+    }
+
+    .brand-subtitle {
+      margin: 0;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lang-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    select.lang-select {
+      appearance: none;
+      background-color: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 34px 8px 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position: calc(100% - 16px) calc(50% - 2px),
+        calc(100% - 11px) calc(50% - 2px);
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+
+    select.lang-select:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .hero {
+      margin-bottom: 32px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.75rem, 3.5vw, 2.35rem);
+      letter-spacing: -0.02em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 62ch;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 24px;
+    }
+
+    .game-card {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+      border-color: #cfc7b8;
+    }
+
+    .cover-link {
+      display: block;
+      text-decoration: none;
+      margin-bottom: 14px;
+    }
+
+    .cover-box {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: var(--cover-radius);
+      overflow: hidden;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .cover-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .placeholder-art {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .placeholder-art.theme-sky {
+      background: linear-gradient(135deg, #e7f0ff 0%, #dceaff 100%);
+      color: #244b9e;
+    }
+
+    .placeholder-art.theme-sun {
+      background: linear-gradient(135deg, #fff4d8 0%, #ffe7b3 100%);
+      color: #7c5100;
+    }
+
+    .placeholder-art.theme-mint {
+      background: linear-gradient(135deg, #e2f7ec 0%, #ccefd9 100%);
+      color: #185c3b;
+    }
+
+    .placeholder-art.theme-peach {
+      background: linear-gradient(135deg, #ffece2 0%, #ffd9c7 100%);
+      color: #873b1b;
+    }
+
+    .placeholder-tag {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.75);
+    }
+
+    .game-title {
+      margin: 0 0 6px;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .game-title a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .game-title a:hover {
+      color: var(--accent);
+    }
+
+    .game-desc {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 0.94rem;
+      flex-grow: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--surface-alt);
+    }
+
+    .folder-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      background: var(--surface-alt);
+      padding: 4px 8px;
+      border-radius: 7px;
+    }
+
+    .play-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 8px 14px;
+      border-radius: 10px;
+      transition: background-color 0.15s ease;
+    }
+
+    .play-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    footer {
+      margin-top: 48px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.88rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand-group">
+        <div class="brand-logo">GAMEBOX</div>
+        <p class="brand-subtitle">Browser JavaScript Games Collection</p>
+      </div>
+
+      <div class="controls">
+        <label class="lang-label" for="language-select">Language</label>
+        <select id="language-select" class="lang-select" aria-label="Select language">
+          <option value="en" selected>English</option>
+        </select>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <h1>Pick a game and play</h1>
+        <p>
+          A light, friendly collection of small browser games built with JavaScript.
+          Each game runs from its own folder.
+        </p>
+      </section>
+
+      <section id="games-grid" class="games-grid" aria-label="Games list"></section>
+    </main>
+
+    <footer>
+      <span>GAMEBOX — Hosted on GitHub Pages</span>
+      <span>Placeholder collection ready for your folders</span>
+    </footer>
+  </div>
+
+  <script>
+    const GAMES = [
+      {
+        title: "Game Title One",
+        description: "Short placeholder description of the first browser game and what makes it fun to play.",
+        folder: "./game-1/",
+        cover: "",
+        theme: "theme-sky",
+        tag: "Placeholder 01"
+      },
+      {
+        title: "Game Title Two",
+        description: "Short placeholder description of a puzzle, grid, or arcade experiment in its own folder.",
+        folder: "./game-2/",
+        cover: "",
+        theme: "theme-sun",
+        tag: "Placeholder 02"
+      },
+      {
+        title: "Game Title Three",
+        description: "Short placeholder description for another standalone JavaScript mini-game or challenge.",
+        folder: "./game-3/",
+        cover: "",
+        theme: "theme-mint",
+        tag: "Placeholder 03"
+      },
+      {
+        title: "Game Title Four",
+        description: "Short placeholder description ready to be replaced when your next game folder is added.",
+        folder: "./game-4/",
+        cover: "",
+        theme: "theme-peach",
+        tag: "Placeholder 04"
+      }
+    ];
+
+    const grid = document.getElementById("games-grid");
+
+    GAMES.forEach((game) => {
+      const card = document.createElement("article");
+      card.className = "game-card";
+
+      const coverContent = game.cover
+        ? `<img src="${game.cover}" alt="${game.title} cover" />`
+        : `<div class="placeholder-art ${game.theme}">
+             <span class="placeholder-tag">${game.tag}</span>
+             <span>${game.title}</span>
+           </div>`;
+
+      card.innerHTML = `
+        <a class="cover-link" href="${game.folder}">
+          <div class="cover-box">
+            ${coverContent}
+          </div>
+        </a>
+        <h2 class="game-title"><a href="${game.folder}">${game.title}</a></h2>
+        <p class="game-desc">${game.description}</p>
+        <div class="card-footer">
+          <span class="folder-pill">${game.folder}</span>
+          <a class="play-btn" href="${game.folder}">Play</a>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+  </script>
+</body>
+</html>
