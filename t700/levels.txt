@@ -1,0 +1,42 @@
+// --- T-700 MAP MAKER ---
+//
+// O : Wall
+// _ : Floor
+// Y : Player (Robot)
+// B : Box
+// E : Envelope
+// S : Switch
+// D : Door (open when switch is ON)
+// U : Door (open when switch is OFF)
+// L : Lorry (for boxes)
+// M : Mailbox (for envelopes)
+//
+[BOX]
+[[BOKS]]
+OOOOOOO
+O_____O
+O_Y_B_L
+OOOOOOO
+//
+[ENVELOPE]
+[[NVLP]]
+OOOOOOO
+O_Y_E_M
+O_____O
+OOOOOOO
+//
+[DOUBLE]
+[[DOBL]]
+OOOOOOOO
+O_Y__E_O
+O____B_M
+OOOOOLOO
+//
+[BLOCKED]
+[[BLCK]]
+OOOMOOO
+O__Y__O
+O__B__O
+O_____O
+O__E__O
+OOOLOOO
