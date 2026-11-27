@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>T-700 - Engine</title>
+    <style>
+        :root { 
+            --tile-size: 46px; 
+        }
+        body { 
+            background: #f1f5f9; 
+            font-family: 'Courier New', Courier, monospace; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            margin: 0; 
+            padding: 10px; 
+            touch-action: manipulation;
+            color: #1e293b; 
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        #header-container {
+            position: sticky;
+            top: 0;
+            background: #f1f5f9;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+            padding-bottom: 5px;
+        }
+
+        h1 { 
+            margin: 5px 0 2px 0; 
+            color: #0284c7; 
+            font-size: 1.6rem; 
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        #level-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        /* TXT Betöltő gomb (offline / helyi futtatáshoz) */
+        .file-upload-btn {
+            background-color: #0284c7;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            display: none;
+        }
+        .file-upload-btn:hover {
+            background-color: #0369a1;
+        }
+        #file-input {
+            display: none;
+        }
+
+        /* Jelszó beviteli mező */
+        #password-input {
+            padding: 5px 10px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background-color: white;
+            color: #0f172a;
+            width: 110px;
+            text-transform: uppercase;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        
+        #ui { 
+            margin-bottom: 8px; 
+            font-weight: bold; 
+            color: #0f172a; 
+            background: #ffffff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            font-size: 0.9rem;
+            text-align: center;
+            width: 90%;
+            max-width: 440px;
+            box-sizing: border-box;
+        }
+
+        #status-bar {
+            min-height: 2.2em;
+            background: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 5px 10px;
+            margin-bottom: 10px;
+            color: #475569;
+            font-size: 0.85rem;
+            font-weight: bold;
+            width: 90%;
+            max-width: 440px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        
+        #game-container {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            display: flex;
+            justify-content: flex-start;
+            padding: 5px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (min-width: 530px) {
+            #game-container { justify-content: center; }
+        }
+        
+        #game-board { 
+            display: grid; 
+            grid-template-columns: repeat(11, var(--tile-size)); 
+            gap: 0; 
+            background: #f1f5f9; 
+            border: 6px solid #94a3b8; 
+            border-radius: 8px; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+        }
+        
+        .tile { 
+            width: var(--tile-size); 
+            height: var(--tile-size); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.8rem; 
+            box-sizing: border-box;
+            position: relative;
+        }
+        
+        .wall { 
+            background-color: #64748b; 
+            background-image: linear-gradient(335deg, #475569 23px, transparent 23px), linear-gradient(155deg, #475569 23px, transparent 23px);
+            background-size: 10px 10px;
+            border: 1px solid #475569;
+        } 
+        
+        .floor { 
+            background-color: #cbd5e1; 
+            border-right: 1px solid #94a3b8;
+            border-bottom: 1px solid #94a3b8;
+        }
+
+        .door-frame { border: 4px solid #b91c1c; box-shadow: inset 0 0 8px rgba(185, 28, 28, 0.6); }
+        .door-frame.open { border: 4px solid #15803d; box-shadow: inset 0 0 8px rgba(21, 128, 61, 0.6); }
+        
+        #controls { 
+            display: grid; 
+            grid-template-columns: repeat(3, 70px); 
+            gap: 12px; 
+            margin-top: auto;
+            padding: 15px 0;
+        }
+        .btn { 
+            width: 70px; 
+            height: 70px; 
+            background: #ffffff; 
+            color: #0284c7; 
+            border: 2px solid #cbd5e1; 
+            border-radius: 16px; 
+            font-size: 26px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            transition: all 0.1s ease;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        .btn:active { 
+            background: #f1f5f9; 
+            border-color: #0284c7;
+            transform: scale(0.95);
+        }
+        .btn-up { grid-column: 2; grid-row: 1; }
+        .btn-left { grid-column: 1; grid-row: 2; }
+        .btn-down { grid-column: 2; grid-row: 2; }
+        .btn-right { grid-column: 3; grid-row: 2; }
+    </style>
+</head>
+<body>
+
+    <div id="header-container">
+        <h1>T-700</h1>
+        <div id="level-title">Level 1: First Steps</div>
+        
+        <div class="menu-bar">
+            <!-- Fájl beolvasó (offline módhoz) -->
+            <label class="file-upload-btn" id="upload-label">
+                Load levels.txt
+                <input type="file" id="file-input" accept=".txt" onchange="loadMapsFromFile(event)">
+            </label>
+            <!-- Jelszó mező (4 karakteres korlátozással) -->
+            <input type="text" id="password-input" placeholder="PASS" maxlength="4" onchange="checkPassword(this.value)">
+        </div>
+        
+        <div id="ui">
+            Envelopes: <span id="env-delivered">0</span> <span id="env-hand-display" style="color: #64748b;">(+0)</span> / <span id="env-total">0</span><br>
+            Boxes: <span id="box-delivered">0</span> / <span id="box-total">0</span>
+        </div>
+
+        <div id="status-bar">Connecting to system...</div>
+    </div>
+
+    <div id="game-container">
+        <div id="game-board"></div>
+    </div>
+
+    <div id="controls">
+        <button class="btn btn-up" onclick="move(-1, 0)">▲</button>
+        <button class="btn btn-left" onclick="move(0, -1)">◀</button>
+        <button class="btn btn-down" onclick="move(1, 0)">▼</button>
+        <button class="btn btn-right" onclick="move(0, 1)">▶</button>
+    </div>
+
+    <script>
+        // Alapértelmezett beépített pálya tartalék gyanánt
+        let levels = [
+            {
+                name: "First Steps",
+                password: "STRT",
+                layout: [
+                    "OOOOOOOOOOO",
+                    "OY____E_UDO",
+                    "O_B_O_O_D_O",
+                    "O___O_S_D_O",
+                    "O_O_OOOO_OO",
+                    "O_B_E_____O",
+                    "OOOOOMOLOOO"
+                ]
+            }
+        ];
+
+        let currentLevelIndex = 0;
+        let mapBlueprint = [];
+        let map = [];
+        let player = { r: 1, c: 1 };
+        let switchActive = false;
+        let envsInHand = 0;       
+        let envsDelivered = 0;    
+        let boxesDelivered = 0;   
+        let totalEnvelopes = 0;
+        let totalBoxes = 0;
+        let isLevelTransitioning = false;
+
+        function updateStatus(msg) {
+            document.getElementById('status-bar').innerHTML = msg;
+        }
+
+        function countInitialItems() {
+            totalEnvelopes = 0;
+            totalBoxes = 0;
+            for (let r = 0; r < mapBlueprint.length; r++) {
+                for (let c = 0; c < mapBlueprint[r].length; c++) {
+                    if (mapBlueprint[r][c] === 'E') totalEnvelopes++;
+                    if (mapBlueprint[r][c] === 'B') totalBoxes++;
+                }
+            }
+        }
+
+        // Térkép parszer: kezeli a // megjegyzéseket, a [Pálya Neve]-t és a [[JELS]] jelszót
+        function parseLevelsText(text) {
+            const lines = text.split(/\r?\n/);
+            let parsedLevels = [];
+            let currentLevel = null;
+
+            lines.forEach(line => {
+                let trimmed = line.trim();
+                
+                // Üres sorok és megjegyzések kihagyása
+                if (trimmed.length === 0 || trimmed.startsWith('//')) {
+                    return;
+                }
+
+                // [Pálya Neve]
+                if (trimmed.startsWith('[') && trimmed.endsWith(']') && !trimmed.startsWith('[[')) {
+                    if (currentLevel && currentLevel.layout.length > 0) {
+                        parsedLevels.push(currentLevel);
+                    }
+                    currentLevel = {
+                        name: trimmed.slice(1, -1).trim(),
+                        password: "",
+                        layout: []
+                    };
+                    return;
+                }
+
+                // [[JELSZÓ]] - 4 nagybetűs angol kód
+                if (trimmed.startsWith('[[') && trimmed.endsWith(']]')) {
+                    if (currentLevel) {
+                        currentLevel.password = trimmed.slice(2, -2).trim().toUpperCase().slice(0, 4);
+                    }
+                    return;
+                }
+
+                // Térkép (MAP) sorai
+                if (currentLevel) {
+                    currentLevel.layout.push(trimmed);
+                }
+            });
+
+            // Az utolsó pályát is elmentjük
+            if (currentLevel && currentLevel.layout.length > 0) {
+                parsedLevels.push(currentLevel);
+            }
+
+            return parsedLevels;
+        }
+
+        async function autoLoadLevels() {
+            try {
+                const response = await fetch('levels.txt');
+                if (!response.ok) throw new Error('File not found');
+                
+                const text = await response.text();
+                const parsed = parseLevelsText(text);
+                
+                if (parsed.length > 0) {
+                    levels = parsed;
+                    initGame(0);
+                    updateStatus(`System loaded. ${levels.length} levels ready.`);
+                } else {
+                    throw new Error('Empty levels file');
+                }
+            } catch (error) {
+                document.getElementById('upload-label').style.display = 'inline-block';
+                initGame(0);
+                updateStatus("Offline mode. Please upload levels.txt manually.");
+            }
+        }
+
+        function loadMapsFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const parsed = parseLevelsText(text);
+
+                if (parsed.length > 0) {
+                    levels = parsed;
+                    initGame(0);
+                    updateStatus(`Loaded ${levels.length} levels! Ready.`);
+                } else {
+                    updateStatus("Error: Could not parse any levels.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Jelszó ellenőrzése
+        function checkPassword(input) {
+            const cleanedInput = input.trim().toUpperCase();
+            const foundIndex = levels.findIndex(lvl => lvl.password === cleanedInput);
+            
+            if (foundIndex !== -1) {
+                initGame(foundIndex);
+                updateStatus(`Password accepted! Level ${foundIndex + 1} loaded.`);
+            } else {
+                updateStatus("Access Denied. Invalid password.");
+            }
+            document.getElementById('password-input').value = '';
+        }
+
+        function checkVictory() {
+    if (envsDelivered === totalEnvelopes && boxesDelivered === totalBoxes) {
+        isLevelTransitioning = true; // Mozgás letiltása a várakozás alatt
+        
+        if (currentLevelIndex + 1 < levels.length) {
+            // Sima, letisztult üzenet jelszó nélkül
+            updateStatus("LEVEL CLEARED! Loading next level...");
+            
+            setTimeout(() => {
+                currentLevelIndex++;
+                initGame(currentLevelIndex);
+            }, 4000);
+        } else {
+            updateStatus("VICTORY! All depot levels cleared! 🤖🎉");
+        }
+    }
+}
+        function isDoorOpen(row, col) {
+            let baseChar = mapBlueprint[row][col];
+            return baseChar === 'D' ? switchActive : (baseChar === 'U' ? !switchActive : false);
+        }
+
+        function render() {
+            const board = document.getElementById('game-board');
+            board.innerHTML = '';
+            
+            const cols = mapBlueprint[0] ? mapBlueprint[0].length : 11;
+            board.style.gridTemplateColumns = `repeat(${cols}, var(--tile-size))`;
+
+            for (let r = 0; r < map.length; r++) {
+                for (let c = 0; c < map[r].length; c++) {
+                    let tile = document.createElement('div');
+                    let char = map[r][c];
+                    let baseChar = mapBlueprint[r][c];
+
+                    if (baseChar === 'O' && char !== 'L' && char !== 'M') tile.className = 'tile wall';
+                    else {
+                        tile.className = 'tile floor';
+                        if (baseChar === 'D' || baseChar === 'U') tile.className += isDoorOpen(r, c) ? ' door-frame open' : ' door-frame';
+                    }
+
+                    if (char === 'Y') tile.innerText = '🤖';
+                    else if (char === 'B') tile.innerText = '📦';
+                    else if (char === 'E') tile.innerText = '✉️';
+                    else if (char === 'S') tile.innerText = '⚪';
+                    else if (char === 'L') tile.innerText = '🚛';
+                    else if (char === 'M') tile.innerText = '📭';
+
+                    board.appendChild(tile);
+                }
+            }
+            document.getElementById('env-delivered').innerText = envsDelivered;
+            document.getElementById('env-hand-display').innerText = `(+${envsInHand})`;
+            document.getElementById('env-total').innerText = totalEnvelopes;
+            document.getElementById('box-delivered').innerText = boxesDelivered;
+            document.getElementById('box-total').innerText = totalBoxes;
+        }
+
+        function move(dr, dc) {
+            if (isLevelTransitioning) return;
+
+            let nextR = player.r + dr;
+            let nextC = player.c + dc;
+            if (nextR < 0 || nextR >= map.length || nextC < 0 || nextC >= map[0].length) return;
+            
+            let target = map[nextR][nextC];
+            let targetBaseChar = mapBlueprint[nextR][nextC];
+
+            if ((target === 'O' && targetBaseChar !== 'L' && targetBaseChar !== 'M') || ((targetBaseChar === 'D' || targetBaseChar === 'U') && !isDoorOpen(nextR, nextC))) return;
+
+            if (target === 'B') {
+                let boxNextR = nextR + dr;
+                let boxNextC = nextC + dc;
+                if (boxNextR < 0 || boxNextR >= map.length || boxNextC < 0 || boxNextC >= map[0].length) return;
+                
+                let boxTarget = map[boxNextR][boxNextC];
+                if (boxTarget === '_' || boxTarget === 'S' || boxTarget === 'L' || boxTarget === 'M') {
+                    if (boxTarget === 'L') {
+                        boxesDelivered++;
+                        map[nextR][nextC] = '_';
+                        updateStatus("Box loaded into lorry.");
+                    } else {
+                        map[boxNextR][boxNextC] = 'B';
+                        map[nextR][nextC] = '_';
+                    }
+                } else return;
+            } 
+            else if (target === 'E') {
+                envsInHand++;
+                map[nextR][nextC] = '_';
+                updateStatus("Envelope collected.");
+            } 
+            else if (target === 'S') {
+                switchActive = !switchActive;
+                updateStatus("Doors toggled.");
+            } 
+            else if (target === 'M') {
+                if (envsInHand > 0) {
+                    envsDelivered += envsInHand;
+                    envsInHand = 0;
+                    updateStatus("Envelopes posted.");
+                }
+            }
+
+            let origChar = mapBlueprint[player.r][player.c];
+            if (origChar === 'S') map[player.r][player.c] = 'S';
+            else if (origChar === 'D' || origChar === 'U') map[player.r][player.c] = origChar;
+            else if (origChar === 'M') map[player.r][player.c] = 'M';
+            else if (origChar === 'L') map[player.r][player.c] = 'L';
+            else map[player.r][player.c] = '_';
+            
+            player.r = nextR;
+            player.c = nextC;
+            map[player.r][player.c] = 'Y';
+            
+            render();
+            checkVictory();
+        }
+
+        function initGame(levelIndex) {
+    currentLevelIndex = levelIndex;
+    const currentLvl = levels[currentLevelIndex];
+    
+    mapBlueprint = currentLvl.layout;
+    map = mapBlueprint.map(row => row.split(''));
+    switchActive = false;
+    envsInHand = 0;       
+    envsDelivered = 0;    
+    boxesDelivered = 0;   
+    isLevelTransitioning = false;
+    
+    document.getElementById('level-title').innerText = `Level ${currentLevelIndex + 1}: ${currentLvl.name}`;
+    
+    for (let r = 0; r < map.length; r++) {
+        for (let c = 0; c < map[r].length; c++) {
+            if (map[r][c] === 'Y') player = { r, c };
+        }
+    }
+    
+    countInitialItems();
+    render();
+
+    // A sárgával kiemelt jelszó kizárólag a pálya betöltésekor jelenik meg
+    const passTag = `<span style="color: #d97706; background: #fef3c7; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #f59e0b;">${currentLvl.password}</span>`;
+    updateStatus(`Level ${currentLevelIndex + 1} ready. Password: ${passTag}`);
+}
+
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement === document.getElementById('password-input')) return;
+            
+            if(['ArrowUp','w','W'].includes(e.key)) { e.preventDefault(); move(-1, 0); }
+            if(['ArrowDown','s','S'].includes(e.key)) { e.preventDefault(); move(1, 0); }
+            if(['ArrowLeft','a','A'].includes(e.key)) { e.preventDefault(); move(0, -1); }
+            if(['ArrowRight','d','D'].includes(e.key)) { e.preventDefault(); move(0, 1); }
+        });
+
+        autoLoadLevels();
+    </script>
+</body>
+</html>
